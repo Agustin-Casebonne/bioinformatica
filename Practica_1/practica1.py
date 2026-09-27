@@ -1,117 +1,329 @@
 import random
 
-adn_dicc = {
-    "A": "T",
-    "C": "G",
-    "G": "C",
-    "T": "A"
-}
+# 1. TABLAS DE REFERENCIA BIOLOGICA
 
-arn_dicc = {
-    "A": "U",
-    "C": "G",
-    "G": "C",
-    "T": "A"
-}
+COMPLEMENTO_ADN = {"A": "T", "T": "A", "C": "G", "G": "C"}
 
+# Complementariedad entre ADN y ARN
+COMPLEMENTO_ARN = {"A": "U", "T": "A", "C": "G", "G": "C"}
 
-codon_a_aminoacido = {
-    "UUU": "Fenilalanina", "UUC": "Fenilalanina", "UUA": "Leucina", "UUG": "Leucina",
+BASES_VALIDAS = set("ATCG")
+
+CODIGO_GENETICO = {
+    "UUU": "Fenilalanina", "UUC": "Fenilalanina",
+    "UUA": "Leucina", "UUG": "Leucina",
     "CUU": "Leucina", "CUC": "Leucina", "CUA": "Leucina", "CUG": "Leucina",
-    "AUU": "Isoleucina", "AUC": "Isoleucina", "AUA": "Isoleucina", "AUG": "Metionina",
+    "AUU": "Isoleucina", "AUC": "Isoleucina", "AUA": "Isoleucina",
+    "AUG": "Metionina",
     "GUU": "Valina", "GUC": "Valina", "GUA": "Valina", "GUG": "Valina",
     "UCU": "Serina", "UCC": "Serina", "UCA": "Serina", "UCG": "Serina",
     "CCU": "Prolina", "CCC": "Prolina", "CCA": "Prolina", "CCG": "Prolina",
     "ACU": "Treonina", "ACC": "Treonina", "ACA": "Treonina", "ACG": "Treonina",
     "GCU": "Alanina", "GCC": "Alanina", "GCA": "Alanina", "GCG": "Alanina",
     "UAU": "Tirosina", "UAC": "Tirosina",
-    "CAU": "Histidina", "CAC": "Histidina", "CAA": "Glutamina", "CAG": "Glutamina",
-    "AAU": "Asparagina", "AAC": "Asparagina", "AAA": "Lisina", "AAG": "Lisina",
-    "GAU": "Ácido aspártico", "GAC": "Ácido aspártico", "GAA": "Ácido glutámico", "GAG": "Ácido glutámico",
-    "UGU": "Cisteína", "UGC": "Cisteína", "UGG": "Triptófano",
+    "CAU": "Histidina", "CAC": "Histidina",
+    "CAA": "Glutamina", "CAG": "Glutamina",
+    "AAU": "Asparagina", "AAC": "Asparagina",
+    "AAA": "Lisina", "AAG": "Lisina",
+    "GAU": "Acido aspartico", "GAC": "Acido aspartico",
+    "GAA": "Acido glutamico", "GAG": "Acido glutamico",
+    "UGU": "Cisteina", "UGC": "Cisteina",
+    "UGG": "Triptofano",
     "CGU": "Arginina", "CGC": "Arginina", "CGA": "Arginina", "CGG": "Arginina",
     "AGU": "Serina", "AGC": "Serina", "AGA": "Arginina", "AGG": "Arginina",
     "GGU": "Glicina", "GGC": "Glicina", "GGA": "Glicina", "GGG": "Glicina",
 }
 
-def generar_cadena_adn():
-    cadena = ""
-    for i in range(9):
-        base = random.choice(["A", "C", "G", "T"])
-        cadena += base
-    cadena_2 = ""
-    for i in cadena:
-        cadena_2 += adn_dicc[i]
-    return cadena, cadena_2
+# Codones que indican el final de la traducción
+STOP_CODONES = {"UAA": "Ocre", "UAG": "Ambar", "UGA": "Opalo"}
 
-def replicacion(helice1, helice2):
-    print("Helicasa: abriendo la doble hélice...")
-
-    helice1_expandida = ""
-    print("Hebra líder (síntesis continua, ADN polimerasa, 1 cebador):")
-    for i in range(len(helice1)):
-        helice1_expandida += adn_dicc[helice1[i]]
-    print("  ", helice1, "->", helice1_expandida)
-
-    helice2_expandida = ""
-    print("Hebra rezagada (síntesis discontinua, fragmentos de Okazaki):")
-    for i in range(0, len(helice2), 3):
-        trozo = helice2[i:i+3]
-        fragmento = ""
-        for base in trozo:
-            fragmento += adn_dicc[base]
-        helice2_expandida += fragmento
-        print(f"  Cebador + fragmento Okazaki: {trozo} -> {fragmento}")
-    print("  Ligasa: uniendo fragmentos ->", helice2_expandida)
-
-    return helice1_expandida, helice2_expandida
-
-def transcripcion(helice1, helice2):
-    helice1_traducida = ""
-    helice2_traducida = ""
-    for i in range(len(helice1)):
-        helice1_traducida += arn_dicc[helice1[i]]
-        helice2_traducida += arn_dicc[helice2[i]]
-    print("helice 1 transcrita:", helice1,  helice1_traducida)
-    print("helice 2 transcrita:", helice2, helice2_traducida)
-    return helice1_traducida, helice2_traducida
+CODON_INICIO = "AUG"
 
 
-def traducir(helice1, helice2):
-    helice1_traducida = ""
-    helice2_traducida = ""
-    codon1 = ""
-    codon2 = ""
-    stop_codones = ("UAA", "UAG", "UGA")
-    parar1 = False
-    parar2 = False
-    for i in range(0, len(helice1), 3):
-        c1 = helice1[i:i+3]
-        c2 = helice2[i:i+3]
-        if not parar1:
-            if c1 in stop_codones:
-                print(f"Helice 1: codón {c1} -> señal de terminación")
-                parar1 = True
-            else:
-                helice1_traducida += codon_a_aminoacido[c1] + " "
-                codon1 += c1 + " "
-        if not parar2:
-            if c2 in stop_codones:
-                print(f"Helice 2: codón {c2} -> señal de terminación")
-                parar2 = True
-            else:
-                helice2_traducida += codon_a_aminoacido[c2] + " "
-                codon2 += c2 + " "
-    print("Aminoácidos de la helice 1:", codon1, helice1_traducida)
-    print("Aminoácidos de la helice 2:", codon2, helice2_traducida)
-    return helice1_traducida, helice2_traducida
+def linea(titulo=None):
+    print()
+    if titulo:
+        print(titulo)
+        print()
+
+
+def complementaria_adn(cadena):
+    """Devuelve la hebra complementaria de una cadena de ADN."""
+    return "".join(COMPLEMENTO_ADN[b] for b in cadena)
+
+
+def complementaria_inversa_adn(cadena):
+    """Devuelve la complementaria inversa de una cadena de ADN."""
+    return complementaria_adn(cadena)[::-1]
+
+
+def es_adn_valido(cadena):
+    return len(cadena) > 0 and all(b in BASES_VALIDAS for b in cadena)
+
+
+def mostrar_doble_helice(hebra_5_3, hebra_3_5, titulo="Doble helice"):
+    print(f"\n{titulo}")
+    print("  5'-" + hebra_5_3 + "-3'")
+    print("     " + "|" * len(hebra_5_3))
+    print("  3'-" + hebra_3_5 + "-5'")
+
+
+# 2. OBTENER LA SECUENCIA DE ADN INICIAL
+
+def generar_cadena_aleatoria(num_codones=6):
+    """
+    Genera una secuencia de ADN que comienza con AUG y termina
+    con un codón de parada.
+    """
+
+    codones_intermedios = [c for c in CODIGO_GENETICO if c != CODON_INICIO]
+    elegidos = [random.choice(codones_intermedios) for _ in range(num_codones)]
+    codon_stop = random.choice(list(STOP_CODONES.keys()))
+
+    arn_referencia = CODON_INICIO + "".join(elegidos) + codon_stop
+
+    # La hebra codificante de ADN coincide con el ARN, cambiando U por T
+    hebra_codificante = arn_referencia.replace("U", "T")
+
+    # Se obtiene la hebra complementaria
+    hebra_molde = complementaria_adn(hebra_codificante)
+
+    return hebra_codificante, hebra_molde
+
+
+def pedir_cadena_manual():
+    while True:
+        entrada = input(
+            "Introduce la hebra codificante de ADN (solo A,T,C,G): "
+        ).strip().upper()
+
+        if es_adn_valido(entrada):
+            return entrada, complementaria_adn(entrada)
+
+        print("  Secuencia no valida. Usa solo las letras A, T, C, G.")
+
+
+def leer_cadena_de_fichero(ruta):
+    """Lee una secuencia de ADN desde un fichero de texto o FASTA."""
+
+    with open(ruta) as f:
+        lineas_fichero = [
+            l.strip()
+            for l in f
+            if l.strip() and not l.startswith(">")
+        ]
+
+    secuencia = "".join(lineas_fichero).upper()
+
+    if not es_adn_valido(secuencia):
+        raise ValueError(
+            "El fichero no contiene una secuencia de ADN valida "
+            "(solo A,T,C,G)."
+        )
+
+    return secuencia, complementaria_adn(secuencia)
+
+
+# 3. REPLICACIÓN DEL ADN
+
+
+def replicacion(hebra_5_3, hebra_3_5):
+    """
+    Simula la replicacion del ADN.
+    Se muestran la cadena lider, que se sintetiza de forma continua,
+    y la cadena rezagada, que se sintetiza mediante fragmentos de Okazaki.
+    """
+
+    linea("PASO 1: REPLICACIÓN DEL ADN  (ADN -> ADN)")
+
+    mostrar_doble_helice(
+        hebra_5_3,
+        hebra_3_5,
+        "ADN original:"
+    )
+
+    print("\n> HELICASA: separa las dos hebras del ADN.")
+    
+    # Hebra lider 
+
+    print("\n> HEBRA LIDER")
+    print("  Se sintetiza de forma continua.")
+    print("  La primasa coloca un cebador para que pueda comenzar la sintesis.")
+    print("  La ADN polimerasa forma la nueva hebra en sentido 5' -> 3'.")
+
+    hebra_lider = complementaria_adn(hebra_3_5)
+
+    print(f"  Molde (3'->5'):    {hebra_3_5}")
+    print(f"  Nueva hebra (5'->3'): {hebra_lider}")
+
+    # Hebra rezagada 
+
+    print("\n> HEBRA REZAGADA")
+    print("  Se forma de manera discontinua mediante fragmentos de Okazaki.")
+    print("  La primasa coloca cebadores y la ADN polimerasa forma cada fragmento")
+
+    size_fragmento = 3
+    fragmentos = []
+
+    for i in range(0, len(hebra_5_3), size_fragmento):
+
+        trozo_molde = hebra_5_3[i:i + size_fragmento]
+        fragmento_nuevo = complementaria_inversa_adn(trozo_molde)
+
+        fragmentos.append(fragmento_nuevo)
+
+        print(
+            f"  Fragmento de Okazaki: "
+            f"molde 5'- {trozo_molde} -3' -> "
+            f"nuevo 5'- {fragmento_nuevo} -3'"
+        )
+
+    print("\n  Los cebadores se sustituyen por ADN.")
+    print("  La ligasa une los fragmentos de Okazaki.")
+
+    hebra_rezagada = "".join(reversed(fragmentos))
+
+    print(f"  Hebra rezagada final (5'->3'): {hebra_rezagada}")
+
+    linea()
+
+    print("Resultado de la replicación:")
+    print("Se obtienen 2 moleculas de ADN.")
+    print("Cada una contiene una hebra original y una hebra nueva.")
+    
+    mostrar_doble_helice(
+        hebra_lider,
+        hebra_3_5,
+        "Molecula de ADN 1:"
+    )
+
+    print("\nMolecula de ADN 2:")
+    print(f"  Hebra original (5'-> 3'): {hebra_5_3}")
+    print(f"  Hebra nueva     (5'-> 3'): {hebra_rezagada}")
+
+    return hebra_lider, hebra_rezagada
+
+
+# 4. TRANSCRIPCIÓN
+
+def transcripcion(hebra_molde):
+    """
+    Genera el ARNm a partir de la hebra molde de ADN.
+    """
+
+    linea("PASO 2: TRANSCRIPCIÓN  (ADN -> ARNm)")
+
+    print(f"Hebra molde (3'-> 5'): {hebra_molde}")
+
+    print("\n> ARN POLIMERASA: utiliza la hebra molde para formar el ARNm.")
+    
+    arnm = "".join(COMPLEMENTO_ARN[b] for b in hebra_molde)
+
+    print(f"\n  ADN molde (3'-> 5'): {hebra_molde}")
+    print(f"  ARNm       (5'-> 3'): {arnm}")
+
+    return arnm
+
+
+# 5. TRADUCCIÓN
+
+def traduccion(arnm):
+    """
+    Traduce el ARNm a una secuencia de aminoácidos.
+    """
+
+    linea("PASO 3: TRADUCCIÓN  (ARNm -> PROTEINA)")
+
+    print(f"ARNm: {arnm}")
+
+    inicio = arnm.find(CODON_INICIO)
+
+    if inicio == -1:
+        print("\nNo se ha encontrado el codon de inicio AUG.")
+        return []
+
+    print(f"\n> El ribosoma lee el ARNm en grupos de tres bases llamados codones.")
+    print(" Cada codon corresponde a un aminoácido.")
+
+    proteina = []
+    i = inicio
+
+    while i + 3 <= len(arnm):
+
+        codon = arnm[i:i + 3]
+
+        if codon in STOP_CODONES:
+            print(
+                f"  Codon {codon}: Codon de parada. "
+                "Finaliza la traduccion."
+            )
+            break
+
+        aminoacido = CODIGO_GENETICO.get(codon)
+
+        if aminoacido is None:
+            print(f"  Codon {codon}: no reconocido.")
+            break
+
+        etiqueta_inicio = " (inicio)" if codon == CODON_INICIO else ""
+
+        print(f"  Codon {codon} -> {aminoacido}{etiqueta_inicio}")
+
+        proteina.append(aminoacido)
+        i += 3
+
+    else:
+        print("  Se ha terminado el ARNm sin encontrar un codon de parada.")
+
+    linea()
+
+    print("Proteina final:")
+    print("  " + (" - ".join(proteina) if proteina else "(vacia)"))
+
+    return proteina
+
+
+# 6. PROGRAMA 
+
+
+def elegir_origen_adn():
+
+    print("¿Como quieres introducir la molecula de ADN inicial?")
+    print("  1: Generarla aleatoriamente")
+    print("  2: Escribirla por consola")
+    print("  3: Leerla desde un fichero de texto")
+
+    opcion = input("Opcion [1/2/3] (por defecto 1): ").strip()
+
+    if opcion == "2":
+        return pedir_cadena_manual()
+
+    if opcion == "3":
+        ruta = input("Ruta del fichero: ").strip()
+        return leer_cadena_de_fichero(ruta)
+
+    return generar_cadena_aleatoria()
+
+
+def main():
+
+    linea("SIMULADOR DEL DOGMA CENTRAL DE LA BIOLOGIA MOLECULAR")
+
+    hebra_5_3, hebra_3_5 = elegir_origen_adn()
+
+    hebra_lider, hebra_rezagada = replicacion(
+        hebra_5_3,
+        hebra_3_5
+    )
+
+    print("\nContinuamos con la transcripción de la hebra molde original.")
+
+    arnm = transcripcion(hebra_3_5)
+
+    traduccion(arnm)
+
+    linea("FIN DE LA SIMULACIÓN")
+
 
 if __name__ == "__main__":
-    print("Generando cadena de ADN...")
-    helice1, helice2 = generar_cadena_adn()
-    print("Cadena de ADN generada:", helice1, helice2)
-    print("Replicando: Generando divición de helices...")
-    helice1_replicada, helice2_replicada = replicacion(helice1, helice2)
-    print("Transcribiendo: Generando ARN...")
-    helice1_transcrita, helice2_transcrita = transcripcion(helice1_replicada, helice2_replicada)
-    traducir(helice1_transcrita, helice2_transcrita)
+    main()
