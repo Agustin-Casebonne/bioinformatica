@@ -126,60 +126,69 @@ def leer_cadena_de_fichero(ruta):
 
 # 3. REPLICACIÓN DEL ADN
 
+TAM_CEBADOR = 3      # bases del cebador de ARN (en la realidad, unas 10)
+TAM_FRAGMENTO = 6    # bases por fragmento de Okazaki (en la realidad, 100-2000)
+
+
+def cebador_arn(fragmento_adn, largo):
+    """Cebador de ARN: primeras bases de la nueva hebra, con U en lugar de T."""
+    return fragmento_adn[:largo].replace("T", "U")
+
 
 def replicacion(hebra_5_3, hebra_3_5):
     """
     Simula la replicacion del ADN.
     Se muestran la cadena lider, que se sintetiza de forma continua,
     y la cadena rezagada, que se sintetiza mediante fragmentos de Okazaki.
+    Cada sintesis empieza con un cebador de ARN.
     """
 
     linea("PASO 1: REPLICACIÓN DEL ADN  (ADN -> ADN)")
 
-    mostrar_doble_helice(
-        hebra_5_3,
-        hebra_3_5,
-        "ADN original:"
-    )
+    mostrar_doble_helice(hebra_5_3, hebra_3_5, "ADN original:")
 
-    print("\n> HELICASA: separa las dos hebras del ADN.")
-    
-    # Hebra lider 
+    print("\n> HELICASA: separa las dos hebras del ADN (horquilla de replicacion).")
+
+    # Hebra lider
 
     print("\n> HEBRA LIDER")
-    print("  Se sintetiza de forma continua.")
-    print("  La primasa coloca un cebador para que pueda comenzar la sintesis.")
-    print("  La ADN polimerasa forma la nueva hebra en sentido 5' -> 3'.")
+    print("  Se sintetiza de forma continua, con un unico cebador.")
 
     hebra_lider = complementaria_adn(hebra_3_5)
+    k = min(TAM_CEBADOR, len(hebra_lider))
+    cebador = cebador_arn(hebra_lider, k)
 
-    print(f"  Molde (3'->5'):    {hebra_3_5}")
+    print(f"  Molde (3'->5'): {hebra_3_5}")
+    print(f"  PRIMASA: sintetiza el cebador de ARN  5'-{cebador}-3'")
+    print("  ADN POLIMERASA III: alarga la hebra desde el cebador en sentido 5'->3'.")
+    print(f"  Hebra en sintesis (5'->3'): {cebador}{hebra_lider[k:]}  (ARN + ADN)")
+    print("  ADN POLIMERASA I: sustituye el cebador de ARN por ADN.")
     print(f"  Nueva hebra (5'->3'): {hebra_lider}")
 
-    # Hebra rezagada 
+    # Hebra rezagada
 
     print("\n> HEBRA REZAGADA")
     print("  Se forma de manera discontinua mediante fragmentos de Okazaki.")
-    print("  La primasa coloca cebadores y la ADN polimerasa forma cada fragmento")
+    print("  Cada fragmento necesita su propio cebador.")
 
-    size_fragmento = 3
     fragmentos = []
 
-    for i in range(0, len(hebra_5_3), size_fragmento):
+    for i in range(0, len(hebra_5_3), TAM_FRAGMENTO):
 
-        trozo_molde = hebra_5_3[i:i + size_fragmento]
+        trozo_molde = hebra_5_3[i:i + TAM_FRAGMENTO]
         fragmento_nuevo = complementaria_inversa_adn(trozo_molde)
+        k = min(TAM_CEBADOR, len(fragmento_nuevo))
+        cebador = cebador_arn(fragmento_nuevo, k)
 
         fragmentos.append(fragmento_nuevo)
 
-        print(
-            f"  Fragmento de Okazaki: "
-            f"molde 5'- {trozo_molde} -3' -> "
-            f"nuevo 5'- {fragmento_nuevo} -3'"
-        )
+        print(f"\n  Fragmento de Okazaki {len(fragmentos)}:")
+        print(f"    Molde: 5'-{trozo_molde}-3'")
+        print(f"    PRIMASA -> cebador de ARN: 5'-{cebador}-3'")
+        print(f"    ADN POLIMERASA III -> 5'-{cebador}{fragmento_nuevo[k:]}-3'  (ARN + ADN)")
+        print(f"    ADN POLIMERASA I -> cebador sustituido: 5'-{fragmento_nuevo}-3'")
 
-    print("\n  Los cebadores se sustituyen por ADN.")
-    print("  La ligasa une los fragmentos de Okazaki.")
+    print("\n  La LIGASA une los fragmentos de Okazaki.")
 
     hebra_rezagada = "".join(reversed(fragmentos))
 
@@ -190,12 +199,8 @@ def replicacion(hebra_5_3, hebra_3_5):
     print("Resultado de la replicación:")
     print("Se obtienen 2 moleculas de ADN.")
     print("Cada una contiene una hebra original y una hebra nueva.")
-    
-    mostrar_doble_helice(
-        hebra_lider,
-        hebra_3_5,
-        "Molecula de ADN 1:"
-    )
+
+    mostrar_doble_helice(hebra_lider, hebra_3_5, "Molecula de ADN 1:")
 
     print("\nMolecula de ADN 2:")
     print(f"  Hebra original (5'-> 3'): {hebra_5_3}")
