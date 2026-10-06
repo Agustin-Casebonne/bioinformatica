@@ -24,3 +24,6 @@ Requiere Python 3. No usa librerías externas.
 ## Simplificaciones
 - Los fragmentos de Okazaki son de 6 bases y los cebadores de 3, por claridad.
   En la realidad son mucho más largos.
+
+
+Enlace al repositorio: https://github.com/Agustin-Casebonne/bioinformatica/tree/main/Practica_1
