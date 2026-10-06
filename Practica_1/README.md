@@ -26,4 +26,4 @@ Requiere Python 3. No usa librerías externas.
   En la realidad son mucho más largos.
 
 
-Enlace al repositorio: https://github.com/Agustin-Casebonne/bioinformatica/tree/main/Practica_1
+Enlace al repositorio: [Práctica 1](https://github.com/Agustin-Casebonne/bioinformatica/tree/main/Practica_1)
