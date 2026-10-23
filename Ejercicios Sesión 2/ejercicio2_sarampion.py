@@ -17,6 +17,8 @@ with Entrez.esearch(db="nucleotide", term=TERMINO) as handle:
     resultados = Entrez.read(handle)
 
 print(f"Resultados encontrados: {resultados['Count']}")
+if not resultados["IdList"]:
+    raise SystemExit("La búsqueda no devolvió ningún ID.")
 
 # 2) Primer ID
 id_genoma = resultados["IdList"][0]
