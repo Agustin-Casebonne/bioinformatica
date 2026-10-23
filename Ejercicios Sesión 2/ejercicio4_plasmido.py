@@ -1,47 +1,42 @@
-"""
-Ejercicio 4: A la caza de proteínas de resistencia
-Plásmido pT181 de Staphylococcus aureus (NC_001371).
-Descarga el GenBank, extrae todas las CDS y las traduce a proteína.
-"""
 from Bio import Entrez, SeqIO
-from Bio.SeqRecord import SeqRecord
 
-Entrez.email = "tu_correo@ejemplo.com"
-ACCESO = "NC_001371"
+Entrez.email = "tu_correo@alu.ulpgc.es"
 
-# "gbwithparts" en vez de "gb": con "gb" el NCBI a veces devuelve el registro sin secuencia
-with Entrez.efetch(db="nucleotide", id=ACCESO, rettype="gbwithparts", retmode="text") as handle:
-    plasmido = SeqIO.read(handle, "genbank")
+# El enunciado indica NC_001371, pero ese código es el plásmido ColE1 de E. coli.
+# El plásmido pT181 de Staphylococcus aureus es NC_001393.
+accesion = "NC_00171"
 
-print(f"{plasmido.id} - {plasmido.description}")
-print(f"Longitud: {len(plasmido.seq)} pb\n")
+print(f"Descargando el plásmido {accesion} desde el NCBI...\n")
+handle = Entrez.efetch(db="nucleotide", id=accesion,
+                       rettype="gbwithparts", retmode="text")
+plasmido = SeqIO.read(handle, "genbank")
+handle.close()
 
-proteinas = []
-for feature in plasmido.features:
-    if feature.type != "CDS":
-        continue
+# Si el registro viniera sin secuencia, la descargamos en FASTA
+try:
+    str(plasmido.seq[:1])
+except Exception:
+    print("El registro GenBank no incluía la secuencia; descargando FASTA...")
+    handle = Entrez.efetch(db="nucleotide", id=accesion,
+                           rettype="fasta", retmode="text")
+    plasmido.seq = SeqIO.read(handle, "fasta").seq
+    handle.close()
 
-    q = feature.qualifiers
-    gen = q.get("gene", q.get("locus_tag", ["?"]))[0]
-    producto = q.get("product", ["producto desconocido"])[0]
-    tabla = int(q.get("transl_table", [11])[0])   # 11 = código genético bacteriano
+print(f"Analizando: {plasmido.description}")
+print("-" * 60)
 
-    # extract() respeta la hebra (complemento inverso si strand = -1)
-    # y las CDS que cruzan el origen del plásmido circular
-    adn_cds = feature.extract(plasmido.seq)
-    proteina = adn_cds.translate(table=tabla, to_stop=True)
+contador = 0
+for caracteristica in plasmido.features:
+    if caracteristica.type == "CDS":
+        contador += 1
+        nombre = caracteristica.qualifiers.get("product", ["Desconocida"])[0]
 
-    # Comprobación con la traducción oficial del NCBI, si existe
-    oficial = q.get("translation", [None])[0]
-    coincide = "sí" if oficial == str(proteina) else ("no" if oficial else "n/d")
+        # Extraer el gen (respeta la hebra) y traducir con el código bacteriano
+        gen = caracteristica.extract(plasmido.seq)
+        proteina = gen.translate(table="Bacterial", to_stop=True)
 
-    print(f"Gen: {gen} | Producto: {producto}")
-    print(f"  Posición: {feature.location}")
-    print(f"  Longitud: {len(proteina)} aa | Coincide con NCBI: {coincide}")
-    print(f"  {proteina}\n")
+        print(f"Proteína {contador}: {nombre}")
+        print(f"Longitud:  {len(proteina)} aminoácidos")
+        print(f"Secuencia: {proteina}\n")
 
-    proteinas.append(SeqRecord(proteina, id=f"{gen}", description=f"{producto} [{ACCESO}]"))
-
-print(f"Total de CDS traducidas: {len(proteinas)}")
-SeqIO.write(proteinas, "proteinas_pT181.fasta", "fasta")
-print("Proteínas guardadas en 'proteinas_pT181.fasta'")
+print(f"Total de CDS traducidas: {contador}")

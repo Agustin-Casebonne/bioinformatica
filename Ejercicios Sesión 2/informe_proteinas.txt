@@ -1,0 +1,20 @@
+Hemoglobina (subunidad alfa) (P69905)
+  Descripción: RecName: Full=Hemoglobin subunit alpha; AltName: Full=Alpha-globin; AltName: Full=Hemoglobin alpha chain; Contains: RecName: Full=Hemopressin
+  Organismo: Homo sapiens
+  Longitud: 142 aminoácidos
+  Función: Transporta oxígeno desde los pulmones a los tejidos en los glóbulos rojos.
+  Archivo FASTA: P69905.fasta
+
+Mioglobina (P02144)
+  Descripción: RecName: Full=Myoglobin; AltName: Full=Nitrite reductase MB; AltName: Full=Pseudoperoxidase MB
+  Organismo: Homo sapiens
+  Longitud: 154 aminoácidos
+  Función: Almacena oxígeno en el músculo y lo libera durante el esfuerzo.
+  Archivo FASTA: P02144.fasta
+
+Oxitocina (precursor) (P01178)
+  Descripción: RecName: Full=Oxytocin-neurophysin 1 proprotein; Short=OT-NPI; AltName: Full=pro-oxytocin/neurophysin; Short=pro-OXT; Contains: RecName: Full=Oxytocin; AltName: Full=Ocytocin; Contains: RecName: Full=Neurophysin 1; Flags: Precursor
+  Organismo: Homo sapiens
+  Longitud: 125 aminoácidos
+  Función: Hormona que participa en las contracciones del parto, la lactancia y el vínculo social.
+  Archivo FASTA: P01178.fasta

@@ -1,31 +1,56 @@
-"""
-Ejercicio 5: Proteínas "célebres"
-Descarga desde UniProt (Swiss-Prot, revisadas) los FASTA de tres proteínas
-humanas de la lista: hemoglobina (cadena beta), mioglobina y oxitocina.
-"""
-import io
-import urllib.request
-from Bio import SeqIO
+from Bio import Entrez, SeqIO
+from pathlib import Path
 
-PROTEINAS = {
-    "hemoglobina_beta": "P68871",   # HBB_HUMAN
-    "mioglobina": "P02144",         # MYG_HUMAN
-    "oxitocina": "P01178",          # NEU1_HUMAN (precursor oxitocina-neurofisina 1)
+
+Entrez.email = "jaime.rivero103@alu.ulpgc.es"
+
+carpeta = Path(__file__).resolve().parent
+
+proteinas = {
+    "Hemoglobina (subunidad alfa)": ("P69905",
+        "Transporta oxígeno desde los pulmones a los tejidos en los glóbulos rojos."),
+    "Mioglobina": ("P02144",
+        "Almacena oxígeno en el músculo y lo libera durante el esfuerzo."),
+    "Oxitocina (precursor)": ("P01178",
+        "Hormona que participa en las contracciones del parto, la lactancia y el vínculo social."),
 }
 
-registros = []
-for nombre, acceso in PROTEINAS.items():
-    url = f"https://rest.uniprot.org/uniprotkb/{acceso}.fasta"
-    with urllib.request.urlopen(url) as resp:
-        texto = resp.read().decode()
+informe = []
 
-    with open(f"{nombre}.fasta", "w") as f:
-        f.write(texto)
+for nombre, (accesion, funcion) in proteinas.items():
+    print("=" * 70)
+    print(f"{nombre}  ->  {accesion}")
 
-    rec = SeqIO.read(io.StringIO(texto), "fasta")
-    registros.append(rec)
-    print(f"{nombre:<18} {rec.id:<25} {len(rec.seq):>4} aa")
-    print(f"  {rec.description}\n")
+    # Información en formato GenPept
+    handle = Entrez.efetch(db="protein", id=accesion, rettype="gp", retmode="text")
+    gp = SeqIO.read(handle, "genbank")
+    handle.close()
 
-SeqIO.write(registros, "tres_proteinas.fasta", "fasta")
-print("FASTA combinado: tres_proteinas.fasta")
+    organismo = gp.annotations.get("organism", "?")
+    print("Descripción:", gp.description)
+    print("Organismo:  ", organismo)
+    print("Longitud:   ", len(gp.seq), "aminoácidos")
+    print("Función:    ", funcion)
+
+    # Descarga de archivo FASTA y guardado en disco
+    handle = Entrez.efetch(db="protein", id=accesion, rettype="fasta", retmode="text")
+    fasta = SeqIO.read(handle, "fasta")
+    handle.close()
+
+    fichero = carpeta / f"{accesion}.fasta"
+    SeqIO.write(fasta, fichero, "fasta")
+    print(f"FASTA guardado en: {fichero.name}")
+
+    informe.append(
+        f"{nombre} ({accesion})\n"
+        f"  Descripción: {gp.description}\n"
+        f"  Organismo: {organismo}\n"
+        f"  Longitud: {len(gp.seq)} aminoácidos\n"
+        f"  Función: {funcion}\n"
+        f"  Archivo FASTA: {fichero.name}\n"
+    )
+
+ruta_informe = carpeta / "informe_proteinas.txt"
+with open(ruta_informe, "w", encoding="utf-8") as f:
+    f.write("\n".join(informe))
+print(f"\nInforme guardado en '{ruta_informe.name}'.")

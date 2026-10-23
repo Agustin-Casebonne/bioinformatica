@@ -7,13 +7,13 @@ from Bio import Entrez, SeqIO
 Entrez.email = ""
 ACCESO = "NC_045512"
 
-# 1) Descarga en formato GenBank
+# Descarga en formato GenBank
 with Entrez.efetch(db="nucleotide", id=ACCESO, rettype="gb", retmode="text") as handle:
     registro = SeqIO.read(handle, "genbank")
 
 print(f"{registro.id} - {registro.description}\n")
 
-# 2-4) Recorrer features, quedarse solo con los de tipo 'gene' y sacar su nombre
+# Recorrer features, quedarse solo con los de tipo 'gene' y sacar su nombre
 genes = []
 for feature in registro.features:
     if feature.type == "gene":
@@ -23,7 +23,7 @@ for feature in registro.features:
         hebra = "+" if feature.location.strand == 1 else "-"
         genes.append((nombre, inicio, fin, hebra))
 
-# 5) Listado numerado
+# Listado numerado
 print(f"Número de genes: {len(genes)}\n")
 print(f"{'Nº':<4}{'Gen':<10}{'Inicio':>8}{'Fin':>8}{'Long.':>8}  Hebra")
 for i, (nombre, inicio, fin, hebra) in enumerate(genes, start=1):
