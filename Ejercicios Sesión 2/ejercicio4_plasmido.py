@@ -4,7 +4,7 @@ Entrez.email = "tu_correo@alu.ulpgc.es"
 
 # El enunciado indica NC_001371, pero ese código es el plásmido ColE1 de E. coli.
 # El plásmido pT181 de Staphylococcus aureus es NC_001393.
-accesion = "NC_00171"
+accesion = "NC_001371"
 
 print(f"Descargando el plásmido {accesion} desde el NCBI...\n")
 handle = Entrez.efetch(db="nucleotide", id=accesion,
