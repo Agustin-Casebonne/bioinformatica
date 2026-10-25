@@ -1,18 +1,16 @@
-"""
-Ejercicio 2: El sarampión
-Descarga el genoma oficial (RefSeq) del virus del sarampión.
-
-RefSeq es la base de datos SECUNDARIA (curada) del NCBI: se filtra con
-'refseq[filter]'. GenBank (sin filtro) sería la primaria y devolvería miles
-de secuencias de distintos aislados.
-"""
+import os
 from Bio import Entrez, SeqIO
+from dotenv import load_dotenv
 
-Entrez.email = "tu_correo@ejemplo.com"   # el NCBI exige un correo identificativo
+# El NCBI exige un correo identificativo; se lee del fichero .env (no se sube a GitHub)
+load_dotenv()
+Entrez.email = os.getenv("NCBI_EMAIL")
+if not Entrez.email:
+    raise SystemExit("Falta NCBI_EMAIL: añádelo al fichero .env de la raíz del proyecto")
 
 TERMINO = "Measles morbillivirus[Organism] AND refseq[filter]"
 
-# 1) Búsqueda en la base de datos 'nucleotide'
+# Búsqueda en la base de datos 'nucleotide'
 with Entrez.esearch(db="nucleotide", term=TERMINO) as handle:
     resultados = Entrez.read(handle)
 
@@ -20,11 +18,11 @@ print(f"Resultados encontrados: {resultados['Count']}")
 if not resultados["IdList"]:
     raise SystemExit("La búsqueda no devolvió ningún ID.")
 
-# 2) Primer ID
+# Primer ID
 id_genoma = resultados["IdList"][0]
 print(f"Primer ID: {id_genoma}")
 
-# 3) Descarga en formato FASTA
+# Descarga en formato FASTA
 with Entrez.efetch(db="nucleotide", id=id_genoma, rettype="fasta", retmode="text") as handle:
     registro = SeqIO.read(handle, "fasta")
 
