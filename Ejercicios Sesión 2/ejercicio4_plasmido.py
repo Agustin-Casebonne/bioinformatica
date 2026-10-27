@@ -1,6 +1,12 @@
+import os
 from Bio import Entrez, SeqIO
+from dotenv import load_dotenv
 
-Entrez.email = "tu_correo@alu.ulpgc.es"
+# El NCBI exige un correo identificativo; se lee del fichero .env (no se sube a GitHub)
+load_dotenv()
+Entrez.email = os.getenv("NCBI_EMAIL")
+if not Entrez.email:
+    raise SystemExit("Falta NCBI_EMAIL: añádelo al fichero .env de la raíz del proyecto")
 
 # El enunciado indica NC_001371, pero ese código es el plásmido ColE1 de E. coli.
 # El plásmido pT181 de Staphylococcus aureus es NC_001393.

@@ -2,9 +2,15 @@
 Ejercicio 3: La COVID-19
 Lista los genes del genoma de referencia del SARS-CoV-2 (NC_045512).
 """
+import os
 from Bio import Entrez, SeqIO
+from dotenv import load_dotenv
 
-Entrez.email = ""
+# El NCBI exige un correo identificativo; se lee del fichero .env (no se sube a GitHub)
+load_dotenv()
+Entrez.email = os.getenv("NCBI_EMAIL")
+if not Entrez.email:
+    raise SystemExit("Falta NCBI_EMAIL: añádelo al fichero .env de la raíz del proyecto")
 ACCESO = "NC_045512"
 
 # Descarga en formato GenBank

@@ -1,6 +1,12 @@
+import os
 from Bio import Entrez, SeqIO
+from dotenv import load_dotenv
 
-Entrez.email = "tu_correo@ejemplo.com"   # el NCBI exige un correo identificativo
+# El NCBI exige un correo identificativo; se lee del fichero .env (no se sube a GitHub)
+load_dotenv()
+Entrez.email = os.getenv("NCBI_EMAIL")
+if not Entrez.email:
+    raise SystemExit("Falta NCBI_EMAIL: añádelo al fichero .env de la raíz del proyecto")
 
 TERMINO = "Measles morbillivirus[Organism] AND refseq[filter]"
 

@@ -1,8 +1,14 @@
+import os
 from Bio import Entrez, SeqIO
+from dotenv import load_dotenv
 from pathlib import Path
 
 
-Entrez.email = "jaime.rivero103@alu.ulpgc.es"
+# El NCBI exige un correo identificativo; se lee del fichero .env (no se sube a GitHub)
+load_dotenv()
+Entrez.email = os.getenv("NCBI_EMAIL")
+if not Entrez.email:
+    raise SystemExit("Falta NCBI_EMAIL: añádelo al fichero .env de la raíz del proyecto")
 
 carpeta = Path(__file__).resolve().parent
 
