@@ -4,10 +4,39 @@ Ejecutar desde esta carpeta, con el entorno virtual activado:
 
 ```bash
 pip install biopython pandas matplotlib seaborn
+python ejercicio0_nw_sw.py
 python ejercicio1_grid_search.py
 python ejercicio2_heatmap.py
 python ejercicio3_tiempos.py
 ```
+
+## Ejercicio 0: Needleman-Wunsch y Smith-Waterman en Python puro
+
+`ejercicio0_nw_sw.py` implementa los dos algoritmos usando solo listas de Python (sin Biopython ni NumPy). Sigue los 4 pasos de la presentación:
+
+1. **Puntuaciones:** valores de emparejamiento, desemparejamiento y hueco.
+2. **Iniciación de la matriz:** en Needleman-Wunsch, la primera fila y la primera columna acumulan la penalización de hueco; en Smith-Waterman se ponen a cero.
+3. **Rellenado:** `C(i,j) = max(V1, V2, V3)`, donde V1 es la diagonal, V2 viene de arriba y V3 de la izquierda. Smith-Waterman trunca los valores negativos a cero.
+4. **Rastreo inverso:** Needleman-Wunsch empieza en la esquina inferior derecha y termina en la superior izquierda; Smith-Waterman empieza en la celda con el valor más alto y termina al llegar a un cero.
+
+Después se repite cada alineamiento con `PairwiseAligner`, con los mismos parámetros y penalización de hueco lineal.
+
+| Prueba | Modo | Nuestro score | Biopython | Óptimos (Biopython) |
+|---|---|---|---|---|
+| AGCGTTA / ACGTGA (presentación) | global | 15 | 15 | 1 |
+| CGT / ACGTGA (presentación) | local | 15 | 15 | 1 |
+| GACGG / ACG (notebook de clase) | global | 4 | 4 | 2 |
+| GACGG / ACG (notebook de clase) | local | 6 | 6 | 1 |
+| GATTACA / GATACA | global | 24 | 24 | 2 |
+| Proteínas aleatorias (8 y 6 aa) | global | -7 | -7 | 24 |
+| Proteínas aleatorias (8 y 6 aa) | local | 2 | 2 | 4 |
+
+**Comentarios.**
+
+- Las matrices de los ejemplos de la presentación salen idénticas a las de las diapositivas, y la puntuación coincide con Biopython en todas las pruebas.
+- Cuando hay un único óptimo, el alineamiento es exactamente el mismo que el de Biopython.
+- Cuando hay empates (por ejemplo, `GATTACA` frente a `GATACA`), nuestra versión devuelve un único alineamiento y Biopython los devuelve todos. El nuestro puede no ser el primero de Biopython, pero el script comprueba que es uno de sus óptimos. Esto se debe a que, en el rastreo inverso, damos prioridad a la diagonal, luego a arriba y luego a la izquierda.
+- **Global frente a local:** con `GACGG` y `ACG`, el modo global obliga a alinear las dos secuencias completas y da 4 puntos; el local encuentra solo la isla `ACG` y da 6. Lo mismo pasa con las proteínas aleatorias: el global da -7, porque está obligado a alinearlo todo, y el local se queda con un único aminoácido coincidente (2 puntos).
 
 ## Ejercicio 1: Grid Search
 
